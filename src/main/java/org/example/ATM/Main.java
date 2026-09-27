@@ -210,23 +210,21 @@ public class Main {
         atm.performOperation();
     }
 }
-//
 //Main
 //  ↓
-//ATM created
-//  ↓
-//Accounts added
+//ATM
 //  ↓
 //performOperation()
 //  ↓
-//Authenticate user
+//authenticate()
+//  ↓
+//authenticateUser()
+//  ↓
+//          Account.authenticate()
 //  ↓
 //currAccount
 //  ↓
-//          ┌──────────────────────┐
-//          │ ATM Menu             │
-//        ├──────────────────────┤
-//        │ 1. Withdraw          │ → Account.withdraw()
-//│ 2. Deposit           │ → Account.deposit()
-//│ 3. Balance           │ → Account.getBalance()
-//│ 4. Exit              │
+//ATM Menu
+//  ├── withdraw() ──→ Account.withdraw()
+//  ├── deposit()  ──→ Account.deposit()
+//  └── balance()  ──→ Account.getBalance()
