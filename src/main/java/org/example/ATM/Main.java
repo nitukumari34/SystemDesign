@@ -5,8 +5,9 @@ import java.util.List;
 import java.util.Scanner;
 
 class Account {
-    private int accNo;
-    private int pin;
+
+    private final int accNo;
+    private final int pin;
     private double balance;
 
     public Account(int accNo, int pin, double balance) {
@@ -19,21 +20,23 @@ class Account {
         return accNo;
     }
 
-    public int getPin() {
-        return pin;
-    }
-
     public double getBalance() {
         return balance;
     }
 
+    public boolean authenticate(int pin) {
+        return this.pin == pin;
+    }
+
     public void deposit(double amount) {
+
         if (amount <= 0) {
             System.out.println("Invalid deposit amount");
             return;
         }
 
         balance += amount;
+
         System.out.println("Amount deposited successfully");
         System.out.println("Current Balance: " + balance);
     }
@@ -51,6 +54,7 @@ class Account {
         }
 
         balance -= amount;
+
         System.out.println("Amount withdrawn successfully");
         System.out.println("Current Balance: " + balance);
 
@@ -58,27 +62,27 @@ class Account {
     }
 }
 
+
 class ATM {
-    private String bankName;
-    private List<Account> accountList = new ArrayList<>();
-    private Scanner sc = new Scanner(System.in);
+
+    private final String bankName;
+    private final List<Account> accountList = new ArrayList<>();
+    private final Scanner sc = new Scanner(System.in);
 
     public ATM(String bankName) {
         this.bankName = bankName;
     }
 
-    void addAccount(Account account) {
+    public void addAccount(Account account) {
         accountList.add(account);
     }
 
     Account authenticateUser(int accNo, int pin) {
 
-        for (int i = 0; i < accountList.size(); i++) {
-
-            Account account = accountList.get(i);
+        for (Account account : accountList) {
 
             if (account.getAccNo() == accNo &&
-                    account.getPin() == pin) {
+                    account.authenticate(pin)) {
 
                 return account;
             }
@@ -88,39 +92,24 @@ class ATM {
     }
 
     void displayMenu() {
+
         System.out.println("\n===== ATM MENU =====");
         System.out.println("1. Withdrawal");
         System.out.println("2. Deposit");
-        System.out.println("3. Check balance");
+        System.out.println("3. Check Balance");
         System.out.println("4. Exit");
     }
 
     void performOperation() {
 
+        Account currAccount = authenticate();
+
+        if (currAccount == null) {
+            return;
+        }
+
         int choice;
-        int accNo;
-        int pin;
 
-        Account currAccount = null;
-
-        // Authentication
-        do {
-            System.out.println("Enter your account number:");
-            accNo = sc.nextInt();
-
-            System.out.println("Enter your PIN:");
-            pin = sc.nextInt();
-
-            currAccount = authenticateUser(accNo, pin);
-
-            if (currAccount == null) {
-                System.out.println("Invalid account number or PIN");
-            }
-
-        } while (currAccount == null);
-
-
-        // ATM Operations
         do {
 
             displayMenu();
@@ -131,24 +120,15 @@ class ATM {
             switch (choice) {
 
                 case 1:
-                    System.out.println("Enter withdrawal amount:");
-                    double withdrawAmount = sc.nextDouble();
-
-                    currAccount.withdraw(withdrawAmount);
+                    withdraw(currAccount);
                     break;
 
                 case 2:
-                    System.out.println("Enter deposit amount:");
-                    double depositAmount = sc.nextDouble();
-
-                    currAccount.deposit(depositAmount);
+                    deposit(currAccount);
                     break;
 
                 case 3:
-                    System.out.println(
-                            "Current Balance: " +
-                                    currAccount.getBalance()
-                    );
+                    checkBalance(currAccount);
                     break;
 
                 case 4:
@@ -160,12 +140,57 @@ class ATM {
 
                 default:
                     System.out.println("Invalid choice");
-                    break;
             }
 
         } while (choice != 4);
     }
+
+    private Account authenticate() {
+
+        while (true) {
+
+            System.out.println("Enter your account number:");
+            int accNo = sc.nextInt();
+
+            System.out.println("Enter your PIN:");
+            int pin = sc.nextInt();
+
+            Account account = authenticateUser(accNo, pin);
+
+            if (account != null) {
+                System.out.println("Authentication successful");
+                return account;
+            }
+
+            System.out.println("Invalid account number or PIN");
+        }
+    }
+
+    private void withdraw(Account account) {
+
+        System.out.println("Enter withdrawal amount:");
+        double amount = sc.nextDouble();
+
+        account.withdraw(amount);
+    }
+
+    private void deposit(Account account) {
+
+        System.out.println("Enter deposit amount:");
+        double amount = sc.nextDouble();
+
+        account.deposit(amount);
+    }
+
+    private void checkBalance(Account account) {
+
+        System.out.println(
+                "Current Balance: " +
+                        account.getBalance()
+        );
+    }
 }
+
 
 public class Main {
 
@@ -173,8 +198,11 @@ public class Main {
 
         ATM atm = new ATM("SBI");
 
-        Account account1 = new Account(101, 1234, 50000);
-        Account account2 = new Account(102, 5678, 25000);
+        Account account1 =
+                new Account(101, 1234, 50000);
+
+        Account account2 =
+                new Account(102, 5678, 25000);
 
         atm.addAccount(account1);
         atm.addAccount(account2);
